@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Contable Login</title>
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
+<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'><link rel="stylesheet" href="./style.css">
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/alertify.min.js"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/alertify.min.css"/>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/themes/default.min.css"/>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/themes/semantic.min.css"/>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/themes/bootstrap.min.css"/>
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="container">
+	<div class="screen">
+		<div class="screen__content">
+			<div class="login">
+				<div class="login__field">
+					<i class="login__icon fas fa-user"></i>
+					<input type="text" class="login__input" placeholder="User name" id="email">
+				</div>
+				<div class="login__field">
+					<i class="login__icon fas fa-lock"></i>
+					<input type="password" class="login__input" placeholder="Password" id="password">
+				</div>
+				<button class="button login__submit" onclick="login()">
+					<span class="button__text">ingresar Ahora</span>
+					<i class="button__icon fas fa-chevron-right"></i>
+				</button>				
+			</div>
+			<div class="social-login">
+				<h3>CSMA CONTABLE</h3>
+			</div>
+		</div>
+		<div class="screen__background">
+			<span class="screen__background__shape screen__background__shape4"></span>
+			<span class="screen__background__shape screen__background__shape3"></span>		
+			<span class="screen__background__shape screen__background__shape2"></span>
+			<span class="screen__background__shape screen__background__shape1"></span>
+		</div>		
+	</div>
+</div>
+<!-- partial -->
+  
+</body>
+</html>
+
+<script>
+	function login(){
+		  cadena="form1=" + $('#email').val()+
+				"&form2=" + $('#password').val();
+					$.ajax({
+					type:"POST",
+					url:"../../controller/login.php",
+					data:cadena,
+					success:function(r){
+					  if(r==1){
+						window.location="../home/index.php";
+					  }else if(r==2){
+						alertify.error("Usuario o contraseña invalidos, por favor verifica");
+						return false;
+					  }else if(r==3){
+						alertify.error("Su usuario esta desactivado");
+						return false;
+					  }else{
+								  alertify.error("Error de sistema");
+						return false;
+					  }
+					}
+				  });
+	  }
+  </script>
