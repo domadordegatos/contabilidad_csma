@@ -69,6 +69,7 @@ class gestion{
 
   function buscar_mensualidad_general(){
     unset($_SESSION['temp_registro_mensualidad']);
+    unset($_SESSION['fecha_busqueda']);
     $mes = $_POST['form1'];
     require_once "conexion.php";
     $conexion = conexion();
@@ -682,6 +683,52 @@ class gestion{
     }
   }
 
+  function crear_mes2(){
+    date_default_timezone_set('America/Bogota');
+    $ultima_fecha = $_POST['form1'];
+    $fecha = date('Y-m-d');
+    $anio = date("Y");
+    $mes = date("m");
+    unset($_SESSION['crear_mes']);
+    require_once "conexion.php";
+    $conexion = conexion();
+    $sql = "SELECT grados.descripcion, estudiantes.id_estudiante, pensiones.valor,
+          descuentos.porcentaje, grados.id_grado, estudiantes.cartera
+          FROM estudiantes
+          JOIN grados ON grados.id_grado = estudiantes.grado
+          JOIN descuentos ON descuentos.id_descuento = estudiantes.descuento
+          JOIN pensiones ON pensiones.id_pension = estudiantes.pension
+          WHERE estudiantes.estado = '1'";
+    $result = mysqli_query($conexion, $sql);
+    if (mysqli_num_rows($result) <= 0) {
+      echo 2;
+    } else {
+      while ($ver1 = mysqli_fetch_row($result)) {
+        $tabla = $ver1[0] . "||" . //0 nombre grado
+                 $ver1[1] . "||" . //1 id estudiante
+                 $ver1[2] . "||" . //2 valor pension
+                 $ver1[3] . "||" . //3 porcentaje descuento
+                 $ver1[4] . "||" . //4 id grado
+                 $ver1[5] . "||" ; //5 valor cartera
+        $_SESSION['crear_mes'][] = $tabla;
+      }
+      $sql = "UPDATE gestion_cartera SET estado_mes = '0'";
+      $result = mysqli_query($conexion, $sql);
+
+      if (isset($_SESSION['crear_mes'])) {
+        foreach (@$_SESSION['crear_mes'] as $key) {
+          $dat = explode("||", $key);
+          $id_gestion = $mes . $dat[0] . $anio;
+          $saldo_mes = $dat[2] - ($dat[2] * $dat[3]);//valor a pagar este mes
+
+          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,'$saldo_mes',0,1,'$fecha','$dat[4]','$saldo_mes')";
+          $result = mysqli_query($conexion, $sql);
+        }
+      }
+      echo 1;
+    }
+  }
+
   function aplicar_recargo()
   {
     $ultima_fecha = $_POST['form1'];
@@ -723,15 +770,16 @@ class gestion{
             $sql = "UPDATE gestion_cartera
                       INNER JOIN estudiantes ON estudiantes.id_estudiante = gestion_cartera.id_estudiante
                       SET gestion_cartera.estado_recargo = 1, gestion_cartera.saldo_mes = gestion_cartera.saldo_mes + 20000, gestion_cartera.cartera = gestion_cartera.cartera+20000
-                        WHERE estudiantes.recargo = 1 AND gestion_cartera.fecha = '$ultima_fecha' AND (gestion_cartera.pagos_mes < gestion_cartera.saldo_mes * 0.7) OR gestion_cartera.cartera > 0";
+                      WHERE estudiantes.id_estudiante = '$dat[1]' AND gestion_cartera.fecha = '$ultima_fecha' AND 
+		                  ((gestion_cartera.pagos_mes < gestion_cartera.saldo_mes * 0.7) OR gestion_cartera.cartera > 0)";
             $result = mysqli_query($conexion, $sql);
-            return 1;
-          } else {
-            return 3; //el recargo ya esta aplicado
+          }else{
+            return 3;
           }
+        }if($result){
+          return 1;
         }
       }
-      //echo 1;
     }
   }
 

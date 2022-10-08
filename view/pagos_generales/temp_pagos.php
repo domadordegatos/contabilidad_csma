@@ -6,7 +6,7 @@ class gestion2
     function buscar_cartera($grado)
     {
         $fecha = $_SESSION['fecha_busqueda'];
-        unset($_SESSION['consulta_pagos']);
+        //unset($_SESSION['consulta_pagos']);
         require_once "../../model/conexion.php";
         $conexion = conexion();
         $sql = "SELECT * FROM gestion_cartera
@@ -14,7 +14,8 @@ class gestion2
         JOIN descuentos ON descuentos.id_descuento = estudiantes.descuento
         JOIN recargos ON recargos.id_recagos = gestion_cartera.estado_recargo
         JOIN grados ON grados.id_grado = gestion_cartera.grado
-        WHERE gestion_cartera.grado = '$grado' AND gestion_cartera.fecha = '$fecha' and not estudiantes.id_estudiante = 28 order by estudiantes.apellidos asc";
+        WHERE gestion_cartera.grado = '$grado' AND gestion_cartera.fecha = '$fecha' and not estudiantes.id_estudiante = 1 order by estudiantes.apellidos asc";
+        //echo $sql;
         $result = mysqli_query($conexion, $sql);
         if (mysqli_num_rows($result) <= 0) {
             
@@ -63,7 +64,8 @@ class gestion2
               <?php if ($ver[18] > 0) { $g1 = $g1 + $ver[18]; }
                     if ($ver[4] > 0) { $g2 = $g2 + $ver[4]; }
                     if ($ver[5] > 0) { $g3 = $g3 + $ver[5]; }
-                    if ($total > 0) { $g4 = $g4 + $total; } ?>
+                    //if ($total > 0) { $g4 = $g4 + $total; }
+                    if ($ver[9] > 0) { $g4 = $g4 + $ver[9]; } ?>
                 </tr> <?php } 
                 $t1=$t1+$g1; $t2=$t2+$g2; $t3=$t3+$g3; $t4=$t4+$g4; 
                 ?>

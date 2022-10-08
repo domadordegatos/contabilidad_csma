@@ -71,6 +71,11 @@ $result=mysqli_query($conexion,$sql); $fechahidden=mysqli_fetch_row($result);
                         A. Recargos
                     </div>
                 </div>
+                <div class="col-sm-2 d-flex align-items-end">
+                    <div class="btn btn-info btn-sm" onclick="iniciarTodo()">
+                        Iniciar
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-sm-12">
@@ -297,6 +302,32 @@ $result=mysqli_query($conexion,$sql); $fechahidden=mysqli_fetch_row($result);
                 alertify.error('Cancelado');
             });
         }
+          }
+
+          function iniciarTodo(){
+            alertify.confirm("Estas seguro de generar un nuevo mes? se cargarán los saldos pendientes a las carteras",
+            function(){
+                cadena="form1=" + $('#fecha').val();
+                $.ajax({
+              type:"POST",
+              url:"../../controller/crear_mes2.php",
+              data:cadena,
+              success:function(r){
+                if(r==1){
+                    $('#tabla_consulta').load("temp_pagos.php");
+                    alertify.message("Se genero un nuevo mes");
+                    setInterval("location.reload()",1500);
+                    return false;
+                }else{
+                    alertify.error("Error al generar el mes");
+                    return false;
+                }
+              }
+            });
+            },
+            function(){
+                alertify.error('Cancelado');
+            });
           }
 
           function aplicarRecargo(){
