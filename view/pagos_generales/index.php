@@ -38,7 +38,7 @@ require_once "../../model/libraries/lib.php";
         <div class="separador2 p-3">
         <div class="row">
                 <div class="col-sm-12">
-                    <div id="tabla_consulta" style="height: 520px; overflow: scroll; overflow-x: hidden;"></div>
+                    <div id="tabla_consulta"></div>
                 </div>
             </div>
         </div>

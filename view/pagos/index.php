@@ -114,7 +114,7 @@ $result=mysqli_query($conexion,$sql); $fechahidden=mysqli_fetch_row($result);
                 <label for="responsable">Responsable Tutor</label>
                 <input disabled type="text" id="responsable" class="form-control form-control-sm" value=""></div>
             <div class="col-sm-3">
-                <label for="celular">Celular</label>
+                <label for="celular">Cedula</label>
                 <input disabled type="text" id="celular" class="form-control form-control-sm" value=""></div>
         </div>
         <div class="row mt-1">

@@ -3,7 +3,7 @@ session_start();
 
 class gestion2
 {
-    function buscar_cartera($grado)
+    public static function buscar_cartera($grado)
     {
         $fecha = $_SESSION['fecha_busqueda'];
         //unset($_SESSION['consulta_pagos']);

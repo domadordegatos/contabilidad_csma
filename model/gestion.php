@@ -575,26 +575,21 @@ class gestion{
   }
 
 
-  function crear_ano(){
-    require_once "conexion.php";
-    $conexion = conexion();
-    $sql="SELECT fecha FROM gestion_cartera GROUP BY fecha ORDER BY fecha DESC LIMIT 1";
-    $result = mysqli_query($conexion, $sql);
-    $ultima_fecha = mysqli_fetch_row($result);
-
+  function crear_ano(){//iniciar progrma
     date_default_timezone_set('America/Bogota');
     $fecha = date('Y-m-d');
     $anio = date("Y");
     $mes = date("m");
     unset($_SESSION['crear_mes']);
+    require_once "conexion.php";
+    $conexion = conexion();
     $sql = "SELECT grados.descripcion, estudiantes.id_estudiante, pensiones.valor,
-          descuentos.porcentaje, grados.id_grado, estudiantes.cartera,
-          gestion_cartera.pagos_mes, gestion_cartera.saldo_mes FROM estudiantes
+          descuentos.porcentaje, grados.id_grado, estudiantes.cartera
+          FROM estudiantes
           JOIN grados ON grados.id_grado = estudiantes.grado
           JOIN descuentos ON descuentos.id_descuento = estudiantes.descuento
           JOIN pensiones ON pensiones.id_pension = estudiantes.pension
-          JOIN gestion_cartera ON gestion_cartera.id_estudiante = estudiantes.id_estudiante
-          WHERE estudiantes.estado = '1' AND gestion_cartera.fecha = '$ultima_fecha[0]'";
+          WHERE estudiantes.estado = '1'";
     $result = mysqli_query($conexion, $sql);
     if (mysqli_num_rows($result) <= 0) {
       echo 2;
@@ -605,12 +600,12 @@ class gestion{
                  $ver1[2] . "||" . //2 valor pension
                  $ver1[3] . "||" . //3 porcentaje descuento
                  $ver1[4] . "||" . //4 id grado
-                 $ver1[5] . "||" . //5 valor cartera
-                 $ver1[6] . "||" . //6 pagos del mes
-                 $ver1[7] . "||"; //7 saldo del mes
+                 $ver1[5] . "||" ; //5 valor cartera
         $_SESSION['crear_mes'][] = $tabla;
       }
       $sql = "UPDATE gestion_cartera SET estado_mes = '0'";
+      $result = mysqli_query($conexion, $sql);
+      $sql = "UPDATE estudiantes SET cartera = '0'";
       $result = mysqli_query($conexion, $sql);
 
       if (isset($_SESSION['crear_mes'])) {
@@ -618,8 +613,6 @@ class gestion{
           $dat = explode("||", $key);
           $id_gestion = $mes . $dat[0] . $anio;
           $saldo_mes = $dat[2] - ($dat[2] * $dat[3]);//valor a pagar este mes
-          $sql = "UPDATE estudiantes SET cartera = '0' WHERE id_estudiante = '$dat[1]'";
-          $result = mysqli_query($conexion, $sql);
 
           $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,'$saldo_mes',0,1,'$fecha','$dat[4]','$saldo_mes')";
           $result = mysqli_query($conexion, $sql);
@@ -683,7 +676,7 @@ class gestion{
     }
   }
 
-  function crear_mes2(){
+  function crear_mes2(){//iniciar progrma
     date_default_timezone_set('America/Bogota');
     $ultima_fecha = $_POST['form1'];
     $fecha = date('Y-m-d');
@@ -721,7 +714,7 @@ class gestion{
           $id_gestion = $mes . $dat[0] . $anio;
           $saldo_mes = $dat[2] - ($dat[2] * $dat[3]);//valor a pagar este mes
 
-          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,'$saldo_mes',0,1,'$fecha','$dat[4]','$saldo_mes')";
+          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,0,0,1,'$fecha','$dat[4]','$saldo_mes')";
           $result = mysqli_query($conexion, $sql);
         }
       }
