@@ -115,6 +115,9 @@ require_once "../../model/libraries/lib.php";
                 <div class="col-sm-3"><button class="btn btn-info btn-sm btn-lg btn-block" onclick="actualizar_estudiante()">Actualizar</button></div>
                 <div class="col-sm-4"><button class="btn btn-primary btn-sm btn-lg btn-block" onclick="crear_estudiante_cartera()">Crear Estudiante + Cartera</button></div>
             </div>
+            <div class="row mt-2">
+                <button class="ml-3 btn btn-sm btn-warning px-4" onclick="crear_cartera_individual()">Activar cartera</button>
+            </div>
 
         </div>
 
@@ -126,7 +129,7 @@ require_once "../../model/libraries/lib.php";
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <div id="tabla_consulta" style="height: 520px; overflow: scroll; overflow-x: hidden;"></div>
+                    <div id="tabla_consulta" class="scrroll" style="height: 520px; overflow: scroll; overflow-x: hidden;"></div>
                 </div>
             </div>
         </div>
@@ -135,8 +138,65 @@ require_once "../../model/libraries/lib.php";
 </body>
 
 </html>
+<style>
+    .scrroll::-webkit-scrollbar {
+  width: 16px;
+}
 
+.scrroll::-webkit-scrollbar-track {
+  background-color: #e4e4e4;
+  border-radius: 100px;
+}
+
+.scrroll::-webkit-scrollbar-thumb {
+  background-color: #64AEF4;
+  border-radius: 100px;
+}
+</style>
 <script>
+
+function crear_cartera_individual() {
+        if ($('#nombres').val() == '' || $('#apellidos').val() == '' || $('#resultados_padres').val() == 'A' ||
+            $('#descuento').val() == 'A' || $('#pension').val() == 'A' ||
+            $('#recargo').val() == 'A' || $('#estado').val() == 'A' || $('#cartera').val() == '') {
+            alertify.message("debes llenar todos los campos");
+        } else {
+            cadena = "form1=" + $('#nombres').val() +
+                "&form2=" + $('#apellidos').val() +
+                "&form3=" + $('#resultados_padres').val() +
+                "&form4=" + $('#descuento').val() +
+                "&form5=" + $('#pension').val() +
+                "&form6=" + $('#recargo').val() +
+                "&form7=" + $('#estado').val() +
+                "&form8=" + $('#cartera').val() +
+                "&form9=" + $('#grado').val();
+            $.ajax({
+                type: "POST",
+                url: "../../controller/crear_cartera_individual.php", //validacion de datos de registro
+                data: cadena,
+                success: function(r) {
+                    if (r == 1) {
+                        alertify.message("Cartera creada para este estudiante");
+                        tabla_estudiantes();
+                        $('#tabla_consulta').load("temp_estudiantes.php");
+                        return false;
+                    }else if (r == 2) {
+                        alertify.error("el estudiante no aparece, verifica los nombres");
+                        return false;
+                    }else if (r == 4) {
+                        alertify.error("El estudiante ya tiene cartera este mes");
+                        return false;
+                    }else if (r == 3) {
+                        alertify.error("error al agregar");
+                        return false;
+                    } else {
+                        alertify.error("Error al agregar");
+                        return false;
+                    }
+                }
+            });
+        }
+    }
 
 function nuevo_ano(){
             alertify.confirm("Estas seguro de generar un nuevo año? las carteras se vaciaran",

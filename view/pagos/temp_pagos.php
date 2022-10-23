@@ -10,8 +10,8 @@ session_start();
                     <td>% Desc.</td>
                     <td>Recargo</td>
                     <td>Cartera</td>
-                    <td>Suma del Mes</td>
-                    <td>Pagos del Mes</td>
+                    <td>Suma Mes</td>
+                    <td>Pagos Mes</td>
                     <td>Cartera Total</td>
                 </tr>
             

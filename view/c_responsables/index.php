@@ -15,7 +15,7 @@ require_once "../../model/libraries/lib.php";
 <body onload="consulta_tabla()">
 
     <div class="contenedor p-3 d-flex">
-        <div class="separador1 w-25">
+        <div class="separador1 w-50">
             <div class="row col-sm-12">
                 <h4>Creación de Respondables</h4>
             </div>
@@ -33,7 +33,7 @@ require_once "../../model/libraries/lib.php";
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <label for="celular">Celular</label>
+                    <label for="celular">Cedula</label>
                     <input type="number" id="celular" class="form-control">
                 </div>
             </div>
@@ -46,7 +46,7 @@ require_once "../../model/libraries/lib.php";
         <div class="separador2 p-4 w-50">
         <div class="row">
                 <div class="col-sm-12">
-                    <div id="tabla_consulta" style="height: 520px; overflow: scroll; overflow-x: hidden;"></div>
+                    <div id="tabla_consulta" class="scrroll" style="height: 520px; overflow: scroll; overflow-x: hidden;"></div>
                 </div>
             </div>
         </div>
@@ -54,6 +54,22 @@ require_once "../../model/libraries/lib.php";
     
 </body>
 </html>
+
+<style>
+    .scrroll::-webkit-scrollbar {
+  width: 16px;
+}
+
+.scrroll::-webkit-scrollbar-track {
+  background-color: #e4e4e4;
+  border-radius: 100px;
+}
+
+.scrroll::-webkit-scrollbar-thumb {
+  background-color: #64AEF4;
+  border-radius: 100px;
+}
+</style>
 
 <script>
 

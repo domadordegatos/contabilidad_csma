@@ -59,7 +59,7 @@ require_once "../../model/libraries/lib.php";
         <div class="parte2 p-3 w-50">
         <div class="row">
                 <div class="col-sm-12">
-                    <div id="tabla_consulta" style="height: 520px; overflow: scroll; overflow-x: hidden;"></div>
+                    <div id="tabla_consulta" class="scrroll" style="height: 520px; overflow: auto; overflow-x: hidden;"></div>
                 </div>
             </div>
         </div>
@@ -68,6 +68,21 @@ require_once "../../model/libraries/lib.php";
 </body>
 
 </html>
+<style>
+    .scrroll::-webkit-scrollbar {
+  width: 16px;
+}
+
+.scrroll::-webkit-scrollbar-track {
+  background-color: #e4e4e4;
+  border-radius: 100px;
+}
+
+.scrroll::-webkit-scrollbar-thumb {
+  background-color: #64AEF4;
+  border-radius: 100px;
+}
+</style>
 
 <style>
     table{

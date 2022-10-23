@@ -5,7 +5,7 @@ class gestion{
     unset($_SESSION['temp_padres']);
     require_once "conexion.php";
     $conexion = conexion();
-    $sql = "SELECT p.id_padre, p.apellidos, p.nombres, p.celular FROM padres as p ORDER BY id_padre DESC LIMIT 100";
+    $sql = "SELECT p.id_padre, p.apellidos, p.nombres, p.celular FROM padres as p ORDER BY id_padre DESC";
     $result = mysqli_query($conexion, $sql);
     if (mysqli_num_rows($result) <= 0) {
       echo 2;
@@ -87,8 +87,7 @@ class gestion{
     }
   }
 
-  function crear_matricula()
-  {
+  /* function crear_matricula(){
     date_default_timezone_set('America/Bogota');
     $valor = $_POST['form1']; $id = $_POST['form2']; $nombre = $_POST['form3']; $cedula = $_POST['form4']; $fecha = date('Y-m-d');
     $time = time();
@@ -131,9 +130,9 @@ class gestion{
           if($result){
             return 1;
           }else{
-            return 3;/* problema actualizando cartera */
+            return 3; //problema actualizando cartera 
           }
-        } else {/* eror creando registro */
+        } else {// eror creando registro 
           return 4;
         }
       } else {
@@ -145,12 +144,63 @@ class gestion{
           return 4;
         }
       }
+  } */
+
+  function crear_matricula(){
+    date_default_timezone_set('America/Bogota');
+    $valor = $_POST['form1']; $id = $_POST['form2']; $nombre = $_POST['form3']; $cedula = $_POST['form4']; $fecha = date('Y-m-d');
+    $time = time();
+    $hora = date("H:i:s", $time);
+    require_once "conexion.php";
+    $conexion = conexion();
+
+    $sql = "SELECT valor FROM valor_matricula";
+    $result = mysqli_query($conexion, $sql);
+    $v_matricula = mysqli_fetch_row($result);
+    $user = $_SESSION['user'];
+
+    $id_grado = self::id_grado($id);
+    $id_admin = self::id_admin($user);
+    $sql1 = "SELECT * FROM registro_pagos WHERE id_estudiante = '$id' AND id_movimiento = 3 AND grado = '$id_grado'";
+    $result = mysqli_query($conexion, $sql1);
+
+    $sql2 = "SELECT * FROM gestion_cartera WHERE id_estudiante = '$id' ORDER BY fecha DESC LIMIT 1";
+    $result2 = mysqli_query($conexion, $sql2);
+    $codigo = mysqli_fetch_row($result2);
+
+      if ($valor < $v_matricula) {
+        $restante = $v_matricula[0] - $valor;
+
+        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',3,'$valor',2,'$fecha','$hora','$codigo[0]',0,'$valor','$nombre','$cedula','$id_grado','Matrícula',1,'$restante')";
+
+        $result = mysqli_query($conexion, $sql);
+        if ($result) {
+
+          $sql = "UPDATE estudiantes SET matricula = matricula + '$restante' where id_estudiante = '$id'";
+          $result = mysqli_query($conexion, $sql);
+
+          if($result){
+            return 1;
+          }else{
+            return 3;/* problema actualizando cartera */
+          }
+        } else {/* eror creando registro */
+          return 4;
+        }
+      } else {
+        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',3,'$valor',2,'$fecha','$hora','$codigo[0]',0,'$valor','$nombre','$cedula','$id_grado','Matrícula',1,0)";
+        $result = mysqli_query($conexion, $sql);
+        if ($result) {
+          return 1;
+        } else {
+          return 4;
+        }
+      }
   }
 
 
 
-  public function editar_estudiante_datos($idest)
-  {
+  public function editar_estudiante_datos($idest){//////////////////////////////// ////  cuidadooooooooooooooooooooooo
     require_once "conexion.php";
     $conexion = conexion();
     $sql = "SELECT * FROM estudiantes JOIN padres ON padres.id_padre = estudiantes.id_padre  WHERE id_estudiante= '$idest'";
@@ -168,7 +218,7 @@ class gestion{
       "8" => $ver[8], //cartera
       "9" => $ver[9], //pension
       "10" => $ver[10], //recargo
-      "12" => $ver[12], //nombre padre
+      "12" => $ver[13], //nombre padre
     );
     return $datos;
   }
@@ -178,9 +228,9 @@ class gestion{
     unset($_SESSION['temp_listado_estudiantes']);
     require_once "conexion.php";
     $conexion = conexion();
-    $sql = "SELECT id_estudiante, apellidos, nombres, grados.descripcion FROM estudiantes
-				JOIN grados ON grados.id_grado = estudiantes.grado where estudiantes.estado = 1
-				ORDER BY estudiantes.grado DESC";
+    $sql = "SELECT id_estudiante, apellidos, nombres, grados.descripcion, estudiantes.estado FROM estudiantes
+    JOIN grados ON grados.id_grado = estudiantes.grado
+    ORDER BY estudiantes.grado ASC, estudiantes.estado ASC, estudiantes.apellidos ASC";
     $result = mysqli_query($conexion, $sql);
     if (mysqli_num_rows($result) <= 0) {
       echo 2;
@@ -189,13 +239,59 @@ class gestion{
         $tabla = $ver1[0] . "||" . //id
           $ver1[1] . "||" . //apellidos
           $ver1[2] . "||" . //nombres
-          $ver1[3] . "||"; //grado
+          $ver1[3] . "||". //grado
+          $ver1[4] . "||"; //estado
         $_SESSION['temp_listado_estudiantes'][] = $tabla;
       }
       echo 1;
     }
   }
 
+  function crear_cartera_individual(){
+    date_default_timezone_set('America/Bogota');
+    $nombres = $_POST['form1'];
+    $apellidos = $_POST['form2'];
+    $padre = $_POST['form3'];
+    $descuento = $_POST['form4'];
+    $pension = $_POST['form5'];
+    $grado = $_POST['form9'];
+    $recargo = $_POST['form6'];
+    $estado = $_POST['form7'];
+    $cartera = $_POST['form8'];
+    require_once "conexion.php";
+    $conexion = conexion();
+
+    $sql = "SELECT * FROM estudiantes WHERE nombres = '$nombres' AND apellidos = '$apellidos'";
+    $result = mysqli_query($conexion, $sql);
+    $id_estudiante = mysqli_fetch_row($result);
+    if (mysqli_num_rows($result) <= 0) {
+      return 2;
+    } else {
+      $sql1 = "SELECT id_mes_grado, fecha FROM gestion_cartera WHERE grado = '$grado' ORDER BY fecha DESC LIMIT 1 ";
+      $result = mysqli_query($conexion, $sql1);
+      $gestion_c = mysqli_fetch_row($result);
+
+      $sql3 = "SELECT fecha FROM gestion_cartera ORDER BY fecha DESC LIMIT 1";
+      $result3 = mysqli_query($conexion, $sql3);
+      $fecha_g_c = mysqli_fetch_row($result3);
+
+      $sql5="SELECT * FROM gestion_cartera WHERE id_estudiante = '$id_estudiante[0]' AND fecha = '$fecha_g_c[0]'";
+
+      $result5 = mysqli_query($conexion, $sql5);
+      if (mysqli_num_rows($result5) <= 0){
+
+      $sql = "INSERT INTO gestion_cartera VALUES ('','$gestion_c[0]','$id_estudiante[0]','2','$cartera',0,1,'$fecha_g_c[0]','$grado',$cartera,0)";
+      $result = mysqli_query($conexion, $sql);
+      if ($result) {
+        return 1; /* registro existoso */
+      } else {
+        return 3; /* no inserto el registro de cartera*/
+      }
+    }else{
+      return 4;
+    }
+    }
+  }
 
   function crear_estudiante_cartera(){
     date_default_timezone_set('America/Bogota');
@@ -215,7 +311,7 @@ class gestion{
     $result = mysqli_query($conexion, $sql);
     $last_fecha = mysqli_fetch_row($result);
     if (mysqli_num_rows($result) <= 0) {
-      $sql = "INSERT INTO estudiantes VALUES ('','$nombres','$apellidos','$grado','$estado','$padre','$padre','$descuento',0,'$pension','$recargo')";
+      $sql = "INSERT INTO estudiantes VALUES ('','$nombres','$apellidos','$grado','$estado','$padre','$padre','$descuento',0,'$pension','$recargo',0)";
       $result = mysqli_query($conexion, $sql);
       if ($result) {
         $sql1 = "SELECT id_mes_grado, fecha FROM gestion_cartera WHERE grado = '$grado' ORDER BY fecha DESC LIMIT 1 ";
@@ -230,7 +326,7 @@ class gestion{
         $result2 = mysqli_query($conexion, $sql2);
         $id_estudiante = mysqli_fetch_row($result2);
 
-        $sql = "INSERT INTO gestion_cartera VALUES ('','$gestion_c[0]','$id_estudiante[0]','2','$cartera',0,1,'$fecha_g_c[0]','$grado',$cartera)";
+        $sql = "INSERT INTO gestion_cartera VALUES ('','$gestion_c[0]','$id_estudiante[0]','2','$cartera',0,1,'$fecha_g_c[0]','$grado',$cartera,0)";
         $result = mysqli_query($conexion, $sql);
         if ($result) {
           return 1; /* registro existoso */
@@ -262,7 +358,7 @@ class gestion{
     $sql = "SELECT * FROM estudiantes WHERE nombres = '$nombres' AND apellidos = '$apellidos'";
     $result = mysqli_query($conexion, $sql);
     if (mysqli_num_rows($result) <= 0) {
-      $sql = "INSERT INTO estudiantes VALUES ('','$nombres','$apellidos','$grado','$estado','$padre','$padre','$descuento',0,'$pension','$recargo')";
+      $sql = "INSERT INTO estudiantes VALUES ('','$nombres','$apellidos','$grado','$estado','$padre','$padre','$descuento',0,'$pension','$recargo',0)";
       $result = mysqli_query($conexion, $sql);
       if ($result) {
         $sql1 = "SELECT id_mes_grado, fecha FROM gestion_cartera WHERE grado = '$grado' ORDER BY fecha DESC LIMIT 1 ";
@@ -277,7 +373,7 @@ class gestion{
         $result2 = mysqli_query($conexion, $sql2);
         $id_estudiante = mysqli_fetch_row($result2);
 
-        $sql = "INSERT INTO gestion_cartera VALUES ('','$gestion_c[0]','$id_estudiante[0]','2',0,0,1,'$fecha_g_c[0]','$grado',0)";
+        $sql = "INSERT INTO gestion_cartera VALUES ('','$gestion_c[0]','$id_estudiante[0]','2',0,0,1,'$fecha_g_c[0]','$grado',0,0)";
         $result = mysqli_query($conexion, $sql);
         if ($result) {
           return 1; /* registro existoso */
@@ -292,8 +388,7 @@ class gestion{
     }
   }
 
-  function actualizar_estudiante()
-  {
+  function actualizar_estudiante(){
     date_default_timezone_set('America/Bogota');
     $nombres = $_POST['form1'];
     $apellidos = $_POST['form2'];
@@ -316,8 +411,8 @@ class gestion{
     $cartera_estudiante = mysqli_fetch_row($result3);
 
 
-    $sql = "UPDATE estudiantes  SET nombres = '$nombres', apellidos ='$apellidos', grado = '$grado', estado ='$estado', id_padre ='$padre', descuento = '$descuento',
-            cartera ='$cartera', pension ='$pension', recargo = '$recargo' WHERE id_estudiante= '$id' ";
+    $sql = "UPDATE estudiantes  SET nombres = '$nombres', apellidos ='$apellidos', grado = '$grado', estado ='$estado', id_padre ='$padre', descuento = '$descuento', cartera ='$cartera', pension ='$pension', recargo = '$recargo' WHERE id_estudiante= '$id' ";
+
     $result = mysqli_query($conexion, $sql);
     if ($result) {
 
@@ -373,13 +468,60 @@ class gestion{
     }
   }
 
-  function crear_pago()
-  {
+  function crear_pago_matricula(){
     date_default_timezone_set('America/Bogota');
     $valor = $_POST['form1'];
     $id = $_POST['form2'];
     $nombre = $_POST['form3'];
-    $cedula = $_POST['form4'];
+    $cedula = $_POST['form4']; $concepto = $_POST['form5']; $medio_pago = $_POST['form6'];
+    $fecha = date('Y-m-d');
+    $nuevo_saldo = 0;
+    $time = time();
+    $hora = date("H:i:s", $time);
+    require_once "conexion.php";
+    $conexion = conexion();
+
+    $sql1 = "SELECT * FROM gestion_cartera WHERE id_estudiante = '$id' AND estado_mes = 1 ORDER BY fecha DESC LIMIT 1";
+    $result = mysqli_query($conexion, $sql1);
+
+    $sql2 = "SELECT estudiantes.matricula FROM estudiantes WHERE id_estudiante = '$id'";
+    $result2 = mysqli_query($conexion, $sql2);
+    $matricula = mysqli_fetch_row($result2);
+
+    if (mysqli_num_rows($result) <= 0) {
+      return 2; // el usuario no tiene cartera o mes inactivo
+    } else {
+      $pagos_mes = mysqli_fetch_row($result);
+
+      $sql = "UPDATE estudiantes SET matricula = matricula -'$valor' where id_estudiante = '$id'";
+      $result = mysqli_query($conexion, $sql);
+      if ($result) {
+
+        $nuevo_saldo = $matricula[0] - $valor;
+
+        $user = $_SESSION['user'];
+        $id_admin = self::id_admin($user);
+        $id_grado = self::id_grado($id);
+        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',4,'$valor',2,'$fecha','$hora','$pagos_mes[0]','$matricula[0]','$nuevo_saldo','$nombre','$cedula','$id_grado','$concepto','$medio_pago','$nuevo_saldo')";
+        $result = mysqli_query($conexion, $sql);
+
+        if ($result) {
+          echo 1;
+        } else {
+          return 4; /* no inserto el registro */
+        }
+      } else {
+        echo 3;/* no se actualizo el abono */
+      }
+    }
+  }
+
+  function crear_pago(){
+    date_default_timezone_set('America/Bogota');
+    $valor = $_POST['form1'];
+    $id = $_POST['form2'];
+    $nombre = $_POST['form3'];
+    $cedula = $_POST['form4']; $concepto = $_POST['form5']; $medio_pago = $_POST['form6'];
     $fecha = date('Y-m-d');
     $nuevo_saldo = 0;
     $time = time();
@@ -411,7 +553,7 @@ class gestion{
         $user = $_SESSION['user'];
         $id_admin = self::id_admin($user);
         $id_grado = self::id_grado($id);
-        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',2,'$valor','$pagos_mes[3]','$fecha','$hora','$pagos_mes[0]','$pagos_mes[5]','$nuevo_saldo','$nombre','$cedula','$id_grado')";
+        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',2,'$valor','$pagos_mes[3]','$fecha','$hora','$pagos_mes[0]','$pagos_mes[5]','$nuevo_saldo','$nombre','$cedula','$id_grado','$concepto','$medio_pago','$duplicate_cartera')";
         $result = mysqli_query($conexion, $sql);
 
         if ($result) {
@@ -614,7 +756,7 @@ class gestion{
           $id_gestion = $mes . $dat[0] . $anio;
           $saldo_mes = $dat[2] - ($dat[2] * $dat[3]);//valor a pagar este mes
 
-          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,'$saldo_mes',0,1,'$fecha','$dat[4]','$saldo_mes')";
+          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,'$saldo_mes',0,1,'$fecha','$dat[4]','$saldo_mes',0)";
           $result = mysqli_query($conexion, $sql);
         }
       }
@@ -634,7 +776,7 @@ class gestion{
     $conexion = conexion();
     $sql = "SELECT grados.descripcion, estudiantes.id_estudiante, pensiones.valor,
           descuentos.porcentaje, grados.id_grado, estudiantes.cartera,
-          gestion_cartera.pagos_mes, gestion_cartera.saldo_mes FROM estudiantes
+          gestion_cartera.pagos_mes, gestion_cartera.saldo_mes, gestion_cartera.cartera FROM estudiantes
           JOIN grados ON grados.id_grado = estudiantes.grado
           JOIN descuentos ON descuentos.id_descuento = estudiantes.descuento
           JOIN pensiones ON pensiones.id_pension = estudiantes.pension
@@ -652,7 +794,8 @@ class gestion{
                  $ver1[4] . "||" . //4 id grado
                  $ver1[5] . "||" . //5 valor cartera
                  $ver1[6] . "||" . //6 pagos del mes
-                 $ver1[7] . "||"; //7 saldo del mes
+                 $ver1[7] . "||" . //7 SALDO MES
+                 $ver1[8] . "||"; //8 cartera de final de mes
         $_SESSION['crear_mes'][] = $tabla;
       }
       $sql = "UPDATE gestion_cartera SET estado_mes = '0'";
@@ -668,7 +811,7 @@ class gestion{
           $sql = "UPDATE estudiantes SET cartera = '$saldo_nuevo' WHERE id_estudiante = '$dat[1]'";
           $result = mysqli_query($conexion, $sql);
 
-          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,'$saldo_mes',0,1,'$fecha','$dat[4]','$cartera_duplicate')";
+          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,'$saldo_mes',0,1,'$fecha','$dat[4]','$cartera_duplicate','$dat[8]')";
           $result = mysqli_query($conexion, $sql);
         }
       }
@@ -714,7 +857,7 @@ class gestion{
           $id_gestion = $mes . $dat[0] . $anio;
           $saldo_mes = $dat[2] - ($dat[2] * $dat[3]);//valor a pagar este mes
 
-          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,0,0,1,'$fecha','$dat[4]','$saldo_mes')";
+          $sql = "INSERT INTO gestion_cartera VALUES ('','$id_gestion','$dat[1]',2,0,0,1,'$fecha','$dat[4]','$dat[5]','$dat[5]')";
           $result = mysqli_query($conexion, $sql);
         }
       }

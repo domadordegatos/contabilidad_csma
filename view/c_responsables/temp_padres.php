@@ -8,7 +8,7 @@ session_start();
                 <tr class="table-info text-dark">
                     <td>Id</td>
                     <td>Nombre</td>
-                    <td>Celular</td>
+                    <td>Cedula</td>
                 </tr>
             
       <?php
