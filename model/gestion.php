@@ -148,7 +148,7 @@ class gestion{
 
   function crear_matricula(){
     date_default_timezone_set('America/Bogota');
-    $valor = $_POST['form1']; $id = $_POST['form2']; $nombre = $_POST['form3']; $cedula = $_POST['form4']; $fecha = date('Y-m-d');
+    $valor = $_POST['form1']; $id = $_POST['form2']; $nombre = $_POST['form3']; $cedula = $_POST['form4']; $concepto = $_POST['form6']; $saldo = $_POST['form5']; $medio_pago = $_POST['form7']; $fecha = date('Y-m-d');
     $time = time();
     $hora = date("H:i:s", $time);
     require_once "conexion.php";
@@ -168,15 +168,12 @@ class gestion{
     $result2 = mysqli_query($conexion, $sql2);
     $codigo = mysqli_fetch_row($result2);
 
-      if ($valor < $v_matricula) {
-        $restante = $v_matricula[0] - $valor;
-
-        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',3,'$valor',2,'$fecha','$hora','$codigo[0]',0,'$valor','$nombre','$cedula','$id_grado','Matrícula',1,'$restante')";
+        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',3,'$valor',2,'$fecha','$hora','$codigo[0]',0,'$valor','$nombre','$cedula','$id_grado','$concepto','$medio_pago','$saldo')";
 
         $result = mysqli_query($conexion, $sql);
         if ($result) {
 
-          $sql = "UPDATE estudiantes SET matricula = matricula + '$restante' where id_estudiante = '$id'";
+          $sql = "UPDATE estudiantes SET matricula = matricula + '$saldo' where id_estudiante = '$id'";
           $result = mysqli_query($conexion, $sql);
 
           if($result){
@@ -187,15 +184,6 @@ class gestion{
         } else {/* eror creando registro */
           return 4;
         }
-      } else {
-        $sql = "INSERT INTO registro_pagos VALUES ('','$id_admin','$id',3,'$valor',2,'$fecha','$hora','$codigo[0]',0,'$valor','$nombre','$cedula','$id_grado','Matrícula',1,0)";
-        $result = mysqli_query($conexion, $sql);
-        if ($result) {
-          return 1;
-        } else {
-          return 4;
-        }
-      }
   }
 
 
@@ -441,14 +429,26 @@ class gestion{
     if ($cantidad == '') {
       $cantidad = 1000;
     }
-    $sql = "SELECT registro_pagos.id_registro, estudiantes.apellidos, estudiantes.nombres, grados.descripcion, registro_pagos.nombre,
-        registro_pagos.cedula, registro_pagos.valor_consignado, usuarios.nombre, registro_pagos.fecha_pago FROM registro_pagos
-        JOIN usuarios ON usuarios.id_user = registro_pagos.id_admin
-        JOIN estudiantes ON estudiantes.id_estudiante = registro_pagos.id_estudiante
-        JOIN recargos ON recargos.id_recagos = registro_pagos.recargo
-        JOIN grados ON grados.id_grado = registro_pagos.grado
-        WHERE registro_pagos.id_estudiante= '$id' order by id_registro desc LIMIT $cantidad";
-    $result = mysqli_query($conexion, $sql);
+    if($id=='A'){
+      $sql = "SELECT registro_pagos.id_registro, estudiantes.apellidos, estudiantes.nombres, grados.descripcion, registro_pagos.nombre,
+      registro_pagos.cedula, registro_pagos.valor_consignado, usuarios.nombre, registro_pagos.fecha_pago FROM registro_pagos
+      JOIN usuarios ON usuarios.id_user = registro_pagos.id_admin
+      JOIN estudiantes ON estudiantes.id_estudiante = registro_pagos.id_estudiante
+      JOIN recargos ON recargos.id_recagos = registro_pagos.recargo
+      JOIN grados ON grados.id_grado = registro_pagos.grado
+      order by id_registro desc LIMIT $cantidad";
+      $result = mysqli_query($conexion, $sql);
+    }else{
+      $sql = "SELECT registro_pagos.id_registro, estudiantes.apellidos, estudiantes.nombres, grados.descripcion, registro_pagos.nombre,
+      registro_pagos.cedula, registro_pagos.valor_consignado, usuarios.nombre, registro_pagos.fecha_pago FROM registro_pagos
+      JOIN usuarios ON usuarios.id_user = registro_pagos.id_admin
+      JOIN estudiantes ON estudiantes.id_estudiante = registro_pagos.id_estudiante
+      JOIN recargos ON recargos.id_recagos = registro_pagos.recargo
+      JOIN grados ON grados.id_grado = registro_pagos.grado
+      WHERE registro_pagos.id_estudiante= '$id' order by id_registro desc LIMIT $cantidad";
+      $result = mysqli_query($conexion, $sql);
+    }
+    
     if (mysqli_num_rows($result) <= 0) {
       echo 2;
     } else {
@@ -688,11 +688,11 @@ class gestion{
     $conexion = conexion();
     $sql = "SELECT gestion_cartera.id_mes_grado, gestion_cartera.id_estudiante, estudiantes.nombres, estudiantes.apellidos, 
     estudiantes.cartera, gestion_cartera.saldo_mes, gestion_cartera.pagos_mes, descuentos.descripcion, descuentos.porcentaje, 
-    gestion_cartera.estado_recargo, gestion_cartera.estado_mes, gestion_cartera.estado_recargo FROM gestion_cartera
+    gestion_cartera.estado_recargo, gestion_cartera.estado_mes, gestion_cartera.estado_recargo, estudiantes.matricula, gestion_cartera.cartera_a_fecha, gestion_cartera.cartera FROM gestion_cartera
             JOIN estudiantes ON estudiantes.id_estudiante = gestion_cartera.id_estudiante
             JOIN descuentos ON descuentos.id_descuento = estudiantes.descuento
             JOIN recargos ON recargos.id_recagos = gestion_cartera.estado_recargo
-            WHERE gestion_cartera.grado = '$grado' AND gestion_cartera.fecha = '$mes' and not gestion_cartera.id_estudiante = 28 order by estudiantes.apellidos asc";
+            WHERE gestion_cartera.grado = '$grado' AND gestion_cartera.fecha = '$mes' order by estudiantes.apellidos asc";
     $result = mysqli_query($conexion, $sql);
     if (mysqli_num_rows($result) <= 0) {
       echo 2;
@@ -709,7 +709,10 @@ class gestion{
           $ver1[8] . "||" .
           $ver1[9] . "||" .
           $ver1[10] . "||" .
-          $ver1[11] . "||";
+          $ver1[11] . "||".
+          $ver1[12] . "||".//matricula
+          $ver1[13] . "||".//cartera a fecha
+          $ver1[14] . "||";//cartera de gestion_cartera
         $_SESSION['consulta_pagos'][] = $tabla;
       }
       echo 1;
@@ -907,7 +910,7 @@ class gestion{
                       INNER JOIN estudiantes ON estudiantes.id_estudiante = gestion_cartera.id_estudiante
                       SET gestion_cartera.estado_recargo = 1, gestion_cartera.saldo_mes = gestion_cartera.saldo_mes + 20000, gestion_cartera.cartera = gestion_cartera.cartera+20000
                       WHERE estudiantes.id_estudiante = '$dat[1]' AND gestion_cartera.fecha = '$ultima_fecha' AND 
-		                  ((gestion_cartera.pagos_mes < gestion_cartera.saldo_mes * 0.7) OR gestion_cartera.cartera > 0)";
+                      (gestion_cartera.cartera)>(gestion_cartera.saldo_mes*0.3)";
             $result = mysqli_query($conexion, $sql);
           }else{
             return 3;
@@ -918,6 +921,111 @@ class gestion{
       }
     }
   }
+
+  /* ------------------------------- */
+  function crear_pago_general(){
+    require_once "conexion.php";
+    $conexion = conexion();
+    date_default_timezone_set('America/Bogota');
+            $time = time();
+            $hora = date("H:i:s",$time);
+            $fecha= date('Y-m-d');
+    $valor = $_POST['form1']; $estudiante = $_POST['form2']; $pagante = $_POST['form3']; $cedula = $_POST['form4']; $asunto = $_POST['form5']; $concepto = $_POST['form6']; $medio_pago = $_POST['form7'];
+    $codigo=self::crear_folio_pago_general($asunto);
+    $grado=self::id_grado($estudiante);
+
+    $sql = "INSERT INTO pagos_generales VALUES ('','$asunto','$codigo','$estudiante','$valor','$concepto','$medio_pago','$pagante','$cedula','$fecha','$hora','$grado')";
+    $result = mysqli_query($conexion, $sql);
+    if($result){
+      return 1;
+    }else{
+      return 4;
+    }
+  }
+
+  function buscar_tabla_pagos_generales(){
+    $id_estudiante = $_POST['form1'];
+    $cantidad = $_POST['form2'];
+    unset($_SESSION['temp_pagos_generales']);
+    require_once "conexion.php";
+    $conexion = conexion();
+    if ($cantidad == '') {
+      $cantidad = 1000;
+    }
+    if($id_estudiante=='A'){
+    $sql = "SELECT pagos_generales.id_pago, pagos_generales.fecha, pagos_generales.valor, pagos_generales.concepto, pagos_generales.pagante, pagos_generales.cedula, pagos_generales.codigo,
+    asuntos.codigo, asuntos.descripcion, estudiantes.nombres, estudiantes.apellidos, medio_pago.descripcion, grados.descripcion  
+    FROM pagos_generales
+    JOIN asuntos ON asuntos.id_asunto = pagos_generales.id_asunto
+    JOIN estudiantes ON estudiantes.id_estudiante = pagos_generales.id_estudiante
+    JOIN medio_pago ON medio_pago.id_medio = pagos_generales.id_medio
+    JOIN grados ON grados.id_grado = pagos_generales.id_grado
+    ORDER BY pagos_generales.id_pago desc limit 100";
+    $result = mysqli_query($conexion, $sql);
+    }else{
+      $sql = "SELECT pagos_generales.id_pago, pagos_generales.fecha, pagos_generales.valor, pagos_generales.concepto, pagos_generales.pagante, pagos_generales.cedula, pagos_generales.codigo,
+    asuntos.codigo, asuntos.descripcion, estudiantes.nombres, estudiantes.apellidos, medio_pago.descripcion, grados.descripcion  
+    FROM pagos_generales
+    JOIN asuntos ON asuntos.id_asunto = pagos_generales.id_asunto
+    JOIN estudiantes ON estudiantes.id_estudiante = pagos_generales.id_estudiante
+    JOIN medio_pago ON medio_pago.id_medio = pagos_generales.id_medio
+    JOIN grados ON grados.id_grado = pagos_generales.id_grado
+    where pagos_generales.id_estudiante = '$id_estudiante' ORDER BY pagos_generales.id_pago desc limit $cantidad";
+    $result = mysqli_query($conexion, $sql);
+    }
+    if (mysqli_num_rows($result) <= 0) {
+      echo 2;
+    } else {
+      while ($ver1 = mysqli_fetch_row($result)) {
+        $tabla = $ver1[0] . "||" . //id
+                 $ver1[7] . "||" . //codigo alfabetico
+                 $ver1[6] . "||" . //codigo numerico
+                 $ver1[8] . "||". //asunto
+                 $ver1[10] . "||". //estudiante apellido
+                 $ver1[9] . "||". //estudiante nombre
+                 $ver1[1] . "||"; //fecha
+        $_SESSION['temp_pagos_generales'][] = $tabla;
+      }
+      echo 1;
+    }
+  }
+
+
+  function buscador_datos_estudiante2(){
+
+    unset($_SESSION['buscador2']);
+    $name = $_POST['form1'];
+    require_once "conexion.php";
+    $conexion = conexion();
+    $sql = "SELECT id_estudiante, apellidos,  nombres FROM estudiantes WHERE (apellidos LIKE '%$name%' OR nombres LIKE '%$name%') and estado = 1";
+    $result = mysqli_query($conexion, $sql);
+    if (mysqli_num_rows($result) <= 0) {
+      echo 2;
+    } else {
+      while ($ver1 = mysqli_fetch_row($result)) {
+        $tabla = $ver1[0] . "||" . //id
+          $ver1[1] . "||" . //apellidos
+          $ver1[2] . "||"; //nombres
+        $_SESSION['buscador2'][] = $tabla;
+      }
+      echo 1;
+    }
+  }
+
+  public function crear_folio_pago_general($asunto){
+    require_once "conexion.php";
+    $conexion=conexion();
+    $sql="SELECT codigo from pagos_generales where id_asunto = '$asunto' order by codigo desc limit 1";
+    $result=mysqli_query($conexion,$sql);
+    $id=mysqli_fetch_row($result)[0];
+    if($id=="" or $id==null or $id==0){
+      return 1;
+    }else{
+      return $id + 1;
+    }
+  }
+  /* ------------------------------- */
+
 
   public function id_admin($id_admin)
   {

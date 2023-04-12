@@ -9,24 +9,24 @@ session_start();
 <table class="table table-bordered table-sm mt-4">
     <tr class="table-info text-dark">
         <td>Id</td>
-        <td>Nombre</td>
-        <td>Grado</td>
-        <td>Valor</td>
+        <td>Codigo</td>
+        <td>Asunto</td>
+        <td>Estudiante</td>
         <td>Fecha</td>
         <td>Opc</td>
     </tr>
 
     <?php
-    if (isset($_SESSION['temp_matriculas'])) :
-        foreach (@$_SESSION['temp_matriculas'] as $key) {
+    if (isset($_SESSION['temp_pagos_generales'])) :
+        foreach (@$_SESSION['temp_pagos_generales'] as $key) {
             $dat = explode("||", $key);
     ?>
             <tr>
                 <td><?php echo $dat[0]; ?></td>
-                <td><?php echo $dat[1] . " " . $dat[2]; ?></td>
+                <td><?php echo $dat[1] . "-" . $dat[2]; ?></td>
                 <td><?php echo $dat[3]; ?></td>
-                <td><?php echo number_format($dat[4]); ?></td>
-                <td><?php echo $dat[5]; ?></td>
+                <td><?php echo $dat[4]." ".$dat[5]; ?></td>
+                <td><?php echo $dat[6]; ?></td>
                 <td>
                     <button class="btn btn-sm btn-warning ml-1" id="print" onclick="print(<?php echo $dat[0]; ?>)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">

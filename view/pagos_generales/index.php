@@ -15,7 +15,7 @@ require_once "../../model/libraries/lib.php";
 </head>
 
 <body>
-    <div class="contenedor w-100">
+    <div class="contenedor container-fluid w-100">
         <div class="separador1 m-3">
             <h4>Cartera General del Mes</h4>
             <div class="row mb-2">

@@ -243,11 +243,15 @@ $fechahidden = mysqli_fetch_row($result);
                 success: function(r) {
                     if (r == 1) {
                         if ($('#mes').val() == 'A' || $('#grado').val() == 'A') {
+                            document.getElementById("nombre_pagante").value = "";
+                            document.getElementById("cedula_pagante").value = "";
                             document.getElementById('print').style.display = 'block';
                             alertify.message("Pago Exitoso");
                             return false;
                         } else {
                             buscar();
+                            document.getElementById("nombre_pagante").value = "";
+                            document.getElementById("cedula_pagante").value = "";
                             $('#tabla_consulta').load("temp_pagos.php");
                             document.getElementById('print').style.display = 'block';
                             alertify.message("Pago Exitoso");
@@ -293,11 +297,15 @@ $fechahidden = mysqli_fetch_row($result);
                 success: function(r) {
                     if (r == 1) {
                         if ($('#mes').val() == 'A' || $('#grado').val() == 'A') {
+                            document.getElementById("nombre_pagante").value = "";
+                            document.getElementById("cedula_pagante").value = "";
                             document.getElementById('print').style.display = 'block';
                             alertify.message("Pago Exitoso");
                             return false;
                         } else {
                             buscar();
+                            document.getElementById("nombre_pagante").value = "";
+                            document.getElementById("cedula_pagante").value = "";
                             $('#tabla_consulta').load("temp_pagos.php");
                             document.getElementById('print').style.display = 'block';
                             alertify.message("Pago Exitoso");

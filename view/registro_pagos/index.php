@@ -101,9 +101,6 @@ require_once "../../model/libraries/lib.php";
     });
 
     function buscar_registros() {
-        if ($('#resultados_estudiantes').val() == 'A') {
-            alertify.message("debes llenar todos los campos");
-        } else {
             cadena = "form1=" + $('#resultados_estudiantes').val() +
                 "&form2=" + $('#cantidad_registros').val();
             $.ajax({
@@ -128,6 +125,5 @@ require_once "../../model/libraries/lib.php";
                     }
                 }
             });
-        }
     }
 </script>

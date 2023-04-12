@@ -7,7 +7,7 @@ $conexion=conexion();
 
 $obj= new gestion();
 
-  $result=$obj->buscar_registros_pagos();
+  $result=$obj->buscador_datos_estudiante2();
   echo $result;
 
  ?>

@@ -31,17 +31,19 @@ class gestion2
     }
 </style>
 <table class="table table-sm table-bordered table-striped">
-    <tr class="table-info text-dark">
-        <th>Grado</th>
-        <th>Nombres</th>
-        <th>% Desc.</th>
-        <th>Recargo</th>
-        <th>Matrícula</th>
-        <th>Cartera</th>
-        <th>Suma del Mes</th>
-        <th>Pagos del Mes</th>
-        <th>Cartera Total</th>
-    </tr>
+    <thead class="table-info text-dark">
+        <tr>
+            <th class="header">Grado</th>
+            <th class="header">Nombres</th>
+            <th class="header">% Desc.</th>
+            <th class="header">Recargo</th>
+            <th class="header">Matrícula</th>
+            <th class="header">Cartera</th>
+            <th class="header">Suma del Mes</th>
+            <th class="header">Pagos del Mes</th>
+            <th class="header">Cartera Total</th>
+        </tr>
+    </thead>
 
     <?php
     if (isset($_SESSION['temp_registro_mensualidad'])) :
@@ -62,7 +64,7 @@ class gestion2
                     <td><?php echo number_format($ver[10]); ?></td>                     <!-- 19 cartera a fecha  -->
                     <td><?php echo number_format($ver[4]); ?></td>                      <!-- suma del mes  -->
                     <td><?php echo number_format($ver[5]); ?></td>                      <!-- pagos del mes  -->
-                    <td><?php echo number_format($ver[9]+$ver[22]); ?></td>                      <!-- cartera total -->
+                    <td><?php if($ver[22]>0){echo number_format($ver[9]+$ver[22]);}else{ echo number_format($ver[9]);} ?></td>                      <!-- cartera total -->
               <?php if ($ver[22] > 0) { $g0 = $g0 + $ver[22]; }
                     if ($ver[19] > 0) { $g1 = $g1 + $ver[19]; }
                     if ($ver[4] > 0) { $g2 = $g2 + $ver[4]; }

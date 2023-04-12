@@ -24,10 +24,12 @@ session_start();
                 <td><?php echo $dat[3]." ".$dat[2]; ?></td>
                 <td><?php echo $dat[7]; ?></td>
                 <td><?php if($dat[11] == 1){ echo "Aplicado";}?></td>
-                <td><?php echo number_format($dat[4]); ?></td>
+                <td><?php echo number_format($dat[13]); if($dat[12]>0){?><b><code>*</code></b><?php } ?></td><!-- cartera => cartera a fecha-->
                 <td><?php echo number_format($dat[5]); ?></td>
                 <td><?php echo number_format($dat[6]); ?></td>
-                <td <?php ?>><?php echo number_format(($dat[4]+($dat[5]-$dat[6]))); ?></td>
+                <td <?php ?>><?php if($dat[12]>0){echo number_format($dat[14]+$dat[12]);}else{
+                    echo number_format($dat[14]);
+                } ?></td>
         </tr>
 
 <?php }  endif;?>
